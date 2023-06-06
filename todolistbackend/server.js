@@ -22,7 +22,7 @@ app.post('/login', (req, res) => {
             if(data[i]['password'] == req.password){
                 currIndex = i;
                 console.log(`Logged in as ${req.username}`);
-                res.send(data[currIndex]);
+                res.send(data[currIndex]['list']);
                 return;
             }
             else{
@@ -34,21 +34,26 @@ app.post('/login', (req, res) => {
     currIndex = data.length;
     data.push({'username': req.username, 'password': req.password, 'list': {}});
     console.log(`Account with username ${req.username} created`);
-    res.send(data[currIndex]);
+    res.send(data[currIndex]['list']);
 });
 
 app.post('/toggleItem', (req, res) => {
-    data[currIndex]['list'][req.item] = !data[currIndex]['list'][req.item];
-    res.send(data[currIndex]['list'][req.item]);
+    data[currIndex]['list'][req.body.item] = !data[currIndex]['list'][req.body.item];
+    console.log(data[currIndex]['list']);
+    res.send(data[currIndex]['list']);
 });
 
 app.post('/addItem', (req, res) => {
-    data[currIndex]['list'][req.body.item] = false;
+    if(!data[currIndex]['list'].hasOwnProperty(req.body.item)){
+        data[currIndex]['list'][req.body.item] = false;
+    }
+    console.log(data[currIndex]['list']);
     res.send(data[currIndex]['list']);
 });
 
 app.post('/deleteItem', (req, res) => {
     delete(data[currIndex]['list'][req.body.item]);
+    console.log(data[currIndex]['list']);
     res.send(data[currIndex]['list']);
 });
 

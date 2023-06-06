@@ -1,22 +1,24 @@
 import React from 'react';
 import { useState } from 'react';
+import { Dispatch, SetStateAction } from "react";
 import './App.css';
 
 const backendAddress = '';
+type JSONValue = { [x: string]: boolean };
 
 function App() {
-  const [items, setItems] = useState([]);
+  const [items, setItems] = useState<JSONValue>({});
   return (
     <>
     <div className="App">
       <header className="App-header">
         <h1>My To-Do List</h1>
-        <Login />
-        <AddItem />
-        <DeleteItem />
+        <Login setItems={setItems}/>
+        <AddItem setItems={setItems}/>
+        <DeleteItem setItems={setItems}/>
         <h3>Things To Do</h3>
-        {items.map(listItem => {
-          return (<ListItem item={listItem}/>);
+        {Object.keys(items).map((listItem, i) => {
+          return (<ListItem item={listItem} items={items} setItems={setItems}/>);
         })}
       </header>
       
@@ -27,13 +29,17 @@ function App() {
 
 type Item = {
   item: string;
+  items: JSONValue,
+  setItems: Dispatch<SetStateAction<JSONValue>>
 }
 
-const ListItem = ({ item }: Item) => {
-  const [checked, setChecked] = React.useState(false);
+type IProps = {
+  setItems: Dispatch<SetStateAction<JSONValue>>
+}
+
+const ListItem = ({ item, items, setItems }: Item) => {
 
   const handleChange = () => {
-    setChecked(!checked);
     const postRequest = {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -41,8 +47,9 @@ const ListItem = ({ item }: Item) => {
     };
 
     fetch(`${backendAddress}/toggleItem`, postRequest)
-      .then(response => response.json())
-      .then(data => {console.log(data)});
+      .then(response => {return response.json();})
+      .then(data => {console.log(data); return data;})
+      .then(data => setItems(data));
   };
 
   return (
@@ -50,7 +57,7 @@ const ListItem = ({ item }: Item) => {
     <label>
       <input
         type="checkbox"
-        checked={checked}
+        checked={items[item]}
         onChange={handleChange}
       />
       {item}
@@ -59,7 +66,7 @@ const ListItem = ({ item }: Item) => {
   );
 }
 
-function AddItem() {
+const AddItem = ({setItems}: IProps) => {
   function handleSubmit (e: React.SyntheticEvent) {
     // Prevent the browser from reloading the page
     e.preventDefault();
@@ -76,8 +83,9 @@ function AddItem() {
     };
 
     fetch(`${backendAddress}/addItem`, postRequest)
-      .then(response => response.json())
-      .then(data => {console.log(data)});
+      .then(response => {return response.json();})
+      .then(data => {console.log(data); return data;})
+      .then(data => setItems(data));
   }
   return (
   <form onSubmit={handleSubmit}>
@@ -89,9 +97,9 @@ function AddItem() {
     <input type="submit" value="Submit" />
   </form>
   );
-}
+};
 
-function DeleteItem() {
+function DeleteItem({setItems}: IProps) {
   function handleSubmit (e: React.SyntheticEvent) {
     // Prevent the browser from reloading the page
     e.preventDefault();
@@ -108,8 +116,9 @@ function DeleteItem() {
     };
 
     fetch(`${backendAddress}/deleteItem`, postRequest)
-      .then(response => response.json())
-      .then(data => {console.log(data)});
+    .then(response => response.json())
+    .then(data => {console.log(data); return data;})
+    .then(data => setItems(data));
   }
   return (
   <form onSubmit={handleSubmit}>
@@ -123,7 +132,7 @@ function DeleteItem() {
   );
 }
 
-function Login() {
+function Login({setItems}: IProps) {
   function handleSubmit (e: React.SyntheticEvent) {
     // Prevent the browser from reloading the page
     e.preventDefault();
@@ -143,8 +152,9 @@ function Login() {
     };
 
     fetch(`${backendAddress}/login`, postRequest)
-      .then(response => response.json())
-      .then(data => {console.log(data)});
+      .then(response => {return response.json();})
+      .then(data => {console.log(data); return data;})
+      .then(data => setItems(data));
   }
   return (
   <form onSubmit={handleSubmit}>
